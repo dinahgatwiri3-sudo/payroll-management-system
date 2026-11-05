@@ -4,8 +4,10 @@ import {ShieldCheck,Users,Wallet,ClipboardList,LogOut,Plus,RefreshCw,Download,Pe
 
 async function api(path,token,options={}) {
  const r=await fetch("/api"+path,{...options,headers:{"Content-Type":"application/json",Authorization:"Bearer "+token,...(options.headers||{})}});
- const j=await r.json().catch(()=>({}));
- if(!r.ok) throw new Error(j.error||"Request failed");
+ const raw=await r.text();
+ let j={};
+ try{j=raw?JSON.parse(raw):{}}catch{j={error:raw||r.statusText||"The server returned an unreadable response."}}
+ if(!r.ok) throw new Error(`Request failed (${r.status}): ${j.error||r.statusText||"Unknown server error"}`);
  return j;
 }
 const kes=n=>new Intl.NumberFormat("en-KE",{style:"currency",currency:"KES",maximumFractionDigits:0}).format(Number(n||0));
