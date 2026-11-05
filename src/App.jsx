@@ -38,7 +38,7 @@ export default function App(){
  async function saveEmployee(e){
   e.preventDefault();setBusy(true);setError("");
   try{
-   if(editing) await api("/employees/"+encodeURIComponent(editing.id),session.access_token,{method:"PATCH",body:JSON.stringify(form)});
+   if(editing) await api("/employee-update?id="+encodeURIComponent(editing.id),session.access_token,{method:"PATCH",body:JSON.stringify(form)});
    else await api("/employees",session.access_token,{method:"POST",body:JSON.stringify(form)});
    const wasEditing=Boolean(editing);
    setShow(false);setEditing(null);setForm(blankEmployee);setNotice(wasEditing?"Employee details updated.":"Employee added.");
