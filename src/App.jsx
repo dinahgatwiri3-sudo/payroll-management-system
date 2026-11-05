@@ -38,7 +38,9 @@ export default function App(){
   try{
    if(editing) await api("/employees/"+encodeURIComponent(editing.id),session.access_token,{method:"PATCH",body:JSON.stringify(form)});
    else await api("/employees",session.access_token,{method:"POST",body:JSON.stringify(form)});
-   setShow(false);setEditing(null);setForm(blankEmployee);await refresh();setNotice(editing?"Employee details updated.":"Employee added.");
+   const wasEditing=Boolean(editing);
+   setShow(false);setEditing(null);setForm(blankEmployee);setNotice(wasEditing?"Employee details updated.":"Employee added.");
+   void refresh();
   }catch(e){setError(e.message)}finally{setBusy(false)}
  }
  async function payroll(){setBusy(true);try{await api("/payroll",session.access_token,{method:"POST",body:JSON.stringify({period})});await refresh();setNotice("Payroll draft created and saved.")}catch(e){setError(e.message)}finally{setBusy(false)}}
