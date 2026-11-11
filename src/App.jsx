@@ -24,7 +24,8 @@ function downloadCSV(filename,headers,rows){
 }
 
 export default function App(){
- const [session,setSession]=useState(null),[email,setEmail]=useState(""),[password,setPassword]=useState("");
+ const [session,setSession]=useState(null),[email,setEmail]=useState(""),[password,setPassword]=useState(""),[confirmPassword,setConfirmPassword]=useState("");
+ const [authMode,setAuthMode]=useState("login"),[authNotice,setAuthNotice]=useState("");
  const [error,setError]=useState(""),[busy,setBusy]=useState(false),[page,setPage]=useState("dashboard");
  const [data,setData]=useState({employees:[],payrollRuns:[],auditLogs:[]});
  const [show,setShow]=useState(false),[editing,setEditing]=useState(null),[form,setForm]=useState(blankEmployee);
@@ -32,7 +33,24 @@ export default function App(){
  useEffect(()=>{supabase.auth.getSession().then(({data})=>setSession(data.session));const {data:l}=supabase.auth.onAuthStateChange((_,s)=>setSession(s));return()=>l.subscription.unsubscribe()},[]);
  async function refresh(){if(!session)return;try{setData(await api("/bootstrap",session.access_token));setError("")}catch(e){setError(e.message)}}
  useEffect(()=>{refresh()},[session]);
- async function login(e){e.preventDefault();setBusy(true);setError("");const {data,error}=await supabase.auth.signInWithPassword({email:email.trim(),password});setBusy(false);if(error)setError(error.message);else setSession(data.session)}
+ function switchAuthMode(mode){setAuthMode(mode);setError("");setAuthNotice("");setPassword("");setConfirmPassword("")}
+ async function login(e){
+  e.preventDefault();setBusy(true);setError("");setAuthNotice("");
+  try{const {data,error}=await supabase.auth.signInWithPassword({email:email.trim(),password});if(error)throw error;setSession(data.session)}
+  catch(err){setError(err.message||"Unable to sign in. Please try again.")}finally{setBusy(false)}
+ }
+ async function createAccount(e){
+  e.preventDefault();setError("");setAuthNotice("");
+  if(password!==confirmPassword){setError("The passwords do not match.");return}
+  setBusy(true);
+  try{
+   const redirectTo=window.location.origin;
+   const {data,error}=await supabase.auth.signUp({email:email.trim(),password,options:{emailRedirectTo:redirectTo}});
+   if(error)throw error;
+   if(data.session){setSession(data.session);setAuthNotice("Your account has been created and you are signed in.")}
+   else{setAuthNotice("Account created. Check your email for the confirmation link. After confirming your email, return here and select Login to sign in.");setAuthMode("login");setPassword("");setConfirmPassword("")}
+  }catch(err){setError(err.message||"Unable to create your account. Please try again.")}finally{setBusy(false)}
+ }
  function openAdd(){setEditing(null);setForm(blankEmployee);setShow(true)}
  function openEdit(employee){setEditing(employee);setForm({...blankEmployee,...employee,monthly_salary:String(employee.monthly_salary??"")});setShow(true)}
  async function saveEmployee(e){
@@ -50,7 +68,7 @@ export default function App(){
  function exportEmployees(){downloadCSV("employees.csv",["Employee number","Full name","Email","Department","Job title","Monthly salary (KES)","Status","Created at"],data.employees.map(e=>[e.employee_no,e.full_name,e.email,e.department,e.job_title,e.monthly_salary,e.status,e.created_at]));}
  function exportPayroll(){downloadCSV("payroll-runs.csv",["Period","Employee count","Gross total (KES)","Status","Created by","Created at"],data.payrollRuns.map(r=>[r.period,r.employee_count,r.gross_total,r.status,r.created_by,r.created_at]));}
  async function logout(){await supabase.auth.signOut();setSession(null)}
- if(!session)return <main className="login"><form className="loginbox" onSubmit={login}><div className="logo"><ShieldCheck size={30}/></div><small>SECURE WORKSPACE</small><h1>Payroll Management<br/> & Audit System</h1><p>Sign in with your Supabase account.</p><label>Email<input type="email" value={email} onChange={e=>setEmail(e.target.value)} required/></label><label>Password<input type="password" value={password} onChange={e=>setPassword(e.target.value)} required/></label>{error&&<div className="error">{error}</div>}<button disabled={busy}>{busy?"Signing in…":"Sign in securely"}</button></form></main>;
+ if(!session)return <main className="login"><form className="loginbox" onSubmit={authMode==="login"?login:createAccount}><div className="logo"><ShieldCheck size={30}/></div><small>SECURE WORKSPACE</small><h1>Payroll Management<br/> & Audit System</h1><p>{authMode==="login"?"Sign in with your Supabase account.":"Create an account to access the secure payroll system."}</p><label>Email<input type="email" value={email} onChange={e=>setEmail(e.target.value)} autoComplete="email" required/></label><label>Password<input type="password" value={password} onChange={e=>setPassword(e.target.value)} autoComplete={authMode==="login"?"current-password":"new-password"} required minLength={6}/></label>{authMode==="signup"&&<label>Confirm password<input type="password" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} autoComplete="new-password" required minLength={6}/></label>}{error&&<div className="error" role="alert">{error}</div>}{authNotice&&<div className="notice auth-notice" role="status">{authNotice}</div>}<button disabled={busy} type="submit">{busy?(authMode==="login"?"Signing in…":"Creating account…"):(authMode==="login"?"Login":"Create account")}</button><div className="auth-switch">{authMode==="login"?<>New user? <button type="button" className="textbutton" onClick={()=>switchAuthMode("signup")}>Create account</button></>:<>Already have an account? <button type="button" className="textbutton" onClick={()=>switchAuthMode("login")}>Login</button></>}</div></form></main>;
  const active=data.employees.filter(x=>x.status==="Active");
  return <div className="layout"><aside className="sidebar"><div className="brand"><ShieldCheck size={22}/> <b>SecurePayroll</b></div><p className="navtitle">WORKSPACE</p>{[[ "dashboard","Overview",LayoutDashboard],["employees","Employees",UsersRound],["payroll","Payroll",WalletCards],["audit","Audit trail",FileClock]].map(([k,v,Icon])=><button title={v} className={page===k?"nav active":"nav"} onClick={()=>setPage(k)} key={k}><Icon size={17}/><span>{v}</span></button>)}<button title="Sign out" className="nav logout" onClick={logout}><LogOut size={17}/><span>Sign out</span></button></aside><main className="main"><header><div><small>PAYROLL OPERATIONS</small><h2>{{dashboard:"Overview",employees:"Employee directory",payroll:"Payroll processing",audit:"Audit trail"}[page]}</h2></div><button className="refresh" onClick={refresh}><RefreshCw size={17}/></button></header><section className="content">{error&&<div className="error">{error}</div>}{notice&&<div className="notice" onClick={()=>setNotice("")}>{notice} ×</div>}
  {page==="dashboard"&&<><div className="hero"><small>YOUR CONTROL CENTRE</small><h1>Good to see you.</h1><p>Monitor workforce records, payroll activity and compliance events.</p></div><div className="stats"><article><Users/><small>Total employees</small><strong>{data.employees.length}</strong><span>{active.length} active</span></article><article><Wallet/><small>Payroll runs</small><strong>{data.payrollRuns.length}</strong><span>Recorded periods</span></article><article><ClipboardList/><small>Audit events</small><strong>{data.auditLogs.length}</strong><span>Latest activity</span></article></div><Panel title="Recent payroll activity"><PayrollTable runs={data.payrollRuns.slice(0,5)} onStatus={status}/></Panel></>}
