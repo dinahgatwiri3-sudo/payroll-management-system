@@ -91,3 +91,8 @@ td small{display:block;color:#5e7e78;margin-top:4px;font-size:12px}
  .panelhead{align-items:flex-start}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+.auth-switch{display:flex;justify-content:center;align-items:center;gap:5px;margin-top:18px;color:var(--muted);font-size:13px;flex-wrap:wrap}
+.loginbox .textbutton{width:auto;margin:0;padding:2px 4px;background:transparent;color:var(--teal-800);border:0;text-decoration:underline;font-weight:800}
+.loginbox .textbutton:hover{background:transparent;color:var(--teal-600)}
+.auth-notice{line-height:1.5}
