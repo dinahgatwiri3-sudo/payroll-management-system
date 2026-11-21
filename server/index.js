@@ -14,7 +14,7 @@ const failedLoginWindows=new Map();
 app.post("/api/auth/failed-login",async(req,res)=>{
  if(!ready(res))return;
  const email=typeof req.body?.email==="string"?req.body.email.trim().toLowerCase():"";
- if(email.length>254||!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email))return res.status(400).json({error:"A valid email address is required."});
+ if(email.length>254||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return res.status(400).json({error:"A valid email address is required."});
  const now=Date.now(),windowMs=15*60*1000,previous=failedLoginWindows.get(email);
  const attempt=previous&&now-previous.startedAt<windowMs?{startedAt:previous.startedAt,count:previous.count+1}:{startedAt:now,count:1};
  failedLoginWindows.set(email,attempt);
