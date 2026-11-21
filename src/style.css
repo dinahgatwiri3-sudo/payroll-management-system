@@ -32,7 +32,7 @@ input:focus,select:focus{outline:3px solid rgba(27,154,136,.18);border-color:var
 .sidebar:hover .nav span,.sidebar:focus-within .nav span{opacity:1;width:auto}
 .nav.active,.nav:hover{background:rgba(225,249,245,.25);color:white}
 .logout{margin-top:auto}
-.main{flex:1;min-width:0;max-width:1800px;margin:0 auto;background:var(--surface);border-radius:16px;overflow:hidden;min-height:calc(100vh - 32px)}
+.main{flex:1;min-width:0;max-width:1800px;margin:0 auto;background:var(--surface);border-radius:16px;overflow:visible;min-height:calc(100vh - 32px)}
 header{min-height:88px;background:var(--surface-strong);border:1px solid var(--line);border-radius:13px;margin:16px 16px 0;padding:0 24px;display:flex;align-items:center;justify-content:space-between}
 header h2{font:800 22px Manrope,sans-serif;color:var(--ink);margin:5px 0}
 .refresh{background:#fff;color:var(--teal-800);border:1px solid var(--line);padding:9px}
@@ -118,3 +118,14 @@ td small{display:block;color:#5e7e78;margin-top:4px;font-size:12px}
 @media(max-width:760px){.expense-form{grid-template-columns:1fr}.finance-tabs{display:grid;grid-template-columns:1fr 1fr}.finance-tabs button{width:100%}}
 
 .expense-actions{display:grid;gap:6px;min-width:120px}.expense-actions select{padding:8px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+
+/* Keep finance pages scrollable and prevent reconciliation actions from sitting at the viewport edge. */
+.finance{width:100%;min-width:0}
+.finance .panelhead{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.finance .panelhead>button{flex:0 1 auto;max-width:100%;white-space:normal}
+.finance .tablewrap{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain}
+@media(max-width:760px){
+ .finance .panelhead>button{margin-left:0;width:100%;justify-content:center}
+ .finance-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .finance-tabs button{min-width:0;white-space:normal}
+}
