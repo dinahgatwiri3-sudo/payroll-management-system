@@ -106,7 +106,7 @@ td small{display:block;color:#5e7e78;margin-top:4px;font-size:12px}
 .muted{color:var(--muted);font-size:13px}
 .report-stats{margin:14px 0}
 .report-stats article strong{font-size:22px}
-.report-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 18px}
+.report-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0 0 18px}
 .report-summary>div{background:#edf6f4;border:1px solid var(--line);border-radius:9px;padding:14px}
 .report-summary small,.report-summary b{display:block}
 .report-summary small{color:var(--muted);font-size:12px;margin-bottom:6px}
