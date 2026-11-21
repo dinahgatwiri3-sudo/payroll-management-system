@@ -20,7 +20,7 @@ app.get("/api/audit",auth,async(req,res)=>{
  if(error)return res.status(500).json({error:error.message});
  res.json(data||[]);
 });
-app.post("/api/audit",auth,async(req,res)=>{if(!ready(res))return;const allowed=["LOGIN_SUCCESS","LOGOUT","EXPORT_EMPLOYEES","EXPORT_PAYROLL"];const {action,details}=req.body||{};if(!allowed.includes(action))return res.status(400).json({error:"Unsupported audit action."});await audit(req.user,action,typeof details==="string"?details.slice(0,300):null);res.json({ok:true})});
+app.post("/api/audit",auth,async(req,res)=>{if(!ready(res))return;const allowed=["LOGIN_SUCCESS","LOGOUT","EXPORT_EMPLOYEES","EXPORT_PAYROLL","EXPORT_AUDIT_TRAIL"];const {action,details}=req.body||{};if(!allowed.includes(action))return res.status(400).json({error:"Unsupported audit action."});await audit(req.user,action,typeof details==="string"?details.slice(0,300):null);res.json({ok:true})});
 app.get("/api/health",(_,res)=>res.json({ok:true}));
 const failedLoginWindows=new Map();
 app.post("/api/auth/failed-login",async(req,res)=>{
