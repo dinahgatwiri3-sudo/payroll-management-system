@@ -5,7 +5,7 @@ import {Plus,Upload,RefreshCw,Play,CheckCircle2,AlertTriangle,Wallet,FileSpreads
 const money=n=>new Intl.NumberFormat("en-KE",{style:"currency",currency:"KES",maximumFractionDigits:2}).format(Number(n||0));
 const norm=s=>String(s??"").toLowerCase().replace(/[^a-z0-9]/g,"");
 function dateValue(v){
- if(v instanceof Date&&!Number.isNaN(v.getTime()))return v.toISOString().slice(0,10);
+ if(v instanceof Date&&!Number.isNaN(v.getTime()))return [v.getFullYear(),String(v.getMonth()+1).padStart(2,"0"),String(v.getDate()).padStart(2,"0")].join("-");
  if(typeof v==="number"){const d=XLSX.SSF.parse_date_code(v);if(d)return [d.y,String(d.m).padStart(2,"0"),String(d.d).padStart(2,"0")].join("-")}
  const s=String(v??"").trim();if(/^\d{4}-\d{2}-\d{2}/.test(s))return s.slice(0,10);
  const m=s.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})$/);if(m){const y=m[3].length===2?"20"+m[3]:m[3];return [y,m[2].padStart(2,"0"),m[1].padStart(2,"0")].join("-")}
