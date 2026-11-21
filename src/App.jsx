@@ -60,14 +60,19 @@ export default function App(){
  function openAdd(){setEditing(null);setForm(blankEmployee);setShow(true)}
  function openEdit(employee){setEditing(employee);setForm({...blankEmployee,...employee,monthly_salary:String(employee.monthly_salary??"")});setShow(true)}
  async function saveEmployee(e){
-  e.preventDefault();setBusy(true);setError("");
+  e.preventDefault();setBusy(true);setError("");setNotice("");
   try{
-   if(editing) await api("/employee-update?id="+encodeURIComponent(editing.id),session.access_token,{method:"PATCH",body:JSON.stringify(form)});
-   else await api("/employees",session.access_token,{method:"POST",body:JSON.stringify(form)});
    const wasEditing=Boolean(editing);
-   setShow(false);setEditing(null);setForm(blankEmployee);setNotice(wasEditing?"Employee details updated.":"Employee added.");
-   void refresh();
-  }catch(e){setError(e.message)}finally{setBusy(false)}
+   if(wasEditing) await api("/employee-update?id="+encodeURIComponent(editing.id),session.access_token,{method:"PATCH",body:JSON.stringify(form)});
+   else await api("/employees",session.access_token,{method:"POST",body:JSON.stringify(form)});
+   const fresh=await api("/bootstrap",session.access_token);
+   setData(fresh);
+   const latestAudit=await api("/audit",session.access_token);
+   setAuditRows(latestAudit);
+   setShow(false);setEditing(null);setForm(blankEmployee);
+   setNotice(wasEditing?"Employee details saved. Employee list and audit trail refreshed.":"Employee added. Employee list refreshed.");
+  }catch(e){setError(e.message||"Employee details could not be saved. Please try again.");}
+  finally{setBusy(false)}
  }
  async function payroll(){setBusy(true);try{await api("/payroll",session.access_token,{method:"POST",body:JSON.stringify({period})});await refresh();setNotice("Payroll draft created and saved.")}catch(e){setError(e.message)}finally{setBusy(false)}}
  async function status(id,value){try{await api("/payroll/"+id+"/status",session.access_token,{method:"PATCH",body:JSON.stringify({status:value})});await refresh();setNotice("Payroll status updated.")}catch(e){setError(e.message)}}
