@@ -8,6 +8,18 @@ function ready(res){if(!db){res.status(500).json({error:"Server Supabase setting
 function requireRole(...allowed){return async(req,res,next)=>{if(!ready(res))return;const {data,error}=await db.from("user_roles").select("role").eq("user_id",req.user.id).maybeSingle();if(error)return res.status(500).json({error:"Role permissions are not configured. Run the user_roles SQL migration in Supabase first."});req.userRole=data?.role||"viewer";if(!allowed.includes(req.userRole))return res.status(403).json({error:"You do not have permission to perform this action. Contact an administrator."});next()}}
 
 async function audit(user,action,details){const {error}=await db.from("audit_logs").insert({actor_email:user.email,action,details});if(error)console.error("Audit insert failed:",error.message)}
+app.get("/api/audit",auth,async(req,res)=>{
+ if(!ready(res))return;
+ let query=db.from("audit_logs").select("*").order("created_at",{ascending:false}).limit(500);
+ const {from,to,actor,action}=req.query||{};
+ if(typeof from==="string"&&/^\\d{4}-\\d{2}-\\d{2}$/.test(from))query=query.gte("created_at",from+"T00:00:00.000Z");
+ if(typeof to==="string"&&/^\\d{4}-\\d{2}-\\d{2}$/.test(to))query=query.lte("created_at",to+"T23:59:59.999Z");
+ if(typeof actor==="string"&&actor.trim())query=query.ilike("actor_email","%"+actor.trim().replace(/[%,]/g,"")+"%");
+ if(typeof action==="string"&&action.trim()&&action!=="ALL")query=query.eq("action",action);
+ const {data,error}=await query;
+ if(error)return res.status(500).json({error:error.message});
+ res.json(data||[]);
+});
 app.post("/api/audit",auth,async(req,res)=>{if(!ready(res))return;const allowed=["LOGIN_SUCCESS","LOGOUT","EXPORT_EMPLOYEES","EXPORT_PAYROLL"];const {action,details}=req.body||{};if(!allowed.includes(action))return res.status(400).json({error:"Unsupported audit action."});await audit(req.user,action,typeof details==="string"?details.slice(0,300):null);res.json({ok:true})});
 app.get("/api/health",(_,res)=>res.json({ok:true}));
 const failedLoginWindows=new Map();
