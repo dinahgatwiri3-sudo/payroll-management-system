@@ -112,3 +112,7 @@ td small{display:block;color:#5e7e78;margin-top:4px;font-size:12px}
 .report-summary small{color:var(--muted);font-size:12px;margin-bottom:6px}
 .report-summary b{font:800 17px Manrope,'DM Sans',sans-serif;color:var(--ink)}
 @media(max-width:760px){.report-summary{grid-template-columns:1fr}.filterbar label{min-width:100%}}
+
+
+.finance{display:grid;gap:16px}.finance-tabs{display:flex;gap:8px;flex-wrap:wrap}.finance-tabs button{min-height:40px}.expense-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:end}.expense-form label,.import-controls label{display:grid;gap:7px;font-size:12px;font-weight:700;color:var(--ink)}.expense-form input,.expense-form select,.import-controls select,.exception-actions input,.exception-actions select{width:100%;min-height:40px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}.expense-form button{min-height:40px}.import-controls{display:flex;align-items:end;gap:14px;flex-wrap:wrap;margin:14px 0}.import-controls label{min-width:180px}.file-picker input{display:block;margin-top:7px;max-width:100%;font-weight:400}.exception-actions{display:grid;gap:6px;min-width:170px}.finance .panelhead p{margin:6px 0 0}.finance .tablewrap{margin-top:10px}
+@media(max-width:760px){.expense-form{grid-template-columns:1fr}.finance-tabs{display:grid;grid-template-columns:1fr 1fr}.finance-tabs button{width:100%}}
