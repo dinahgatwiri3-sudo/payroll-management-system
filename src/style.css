@@ -129,3 +129,9 @@ td small{display:block;color:#5e7e78;margin-top:4px;font-size:12px}
  .finance-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}
  .finance-tabs button{min-width:0;white-space:normal}
 }
+
+/* Keep the expenses and reconciliation workspace comfortably centered, not edge-to-edge. */
+.finance-content{width:100%;max-width:1240px;padding-left:clamp(16px,3vw,36px);padding-right:clamp(16px,3vw,36px);margin-left:auto;margin-right:auto}
+.finance-content>.finance{width:100%;max-width:1160px;margin:0 auto}
+.finance-content .panel{min-width:0}
+@media(max-width:760px){.finance-content{padding-left:12px;padding-right:12px}}
