@@ -12,8 +12,8 @@ app.get("/api/audit",auth,async(req,res)=>{
  if(!ready(res))return;
  let query=db.from("audit_logs").select("*").order("created_at",{ascending:false}).limit(500);
  const {from,to,actor,action}=req.query||{};
- if(typeof from==="string"&&/^\\d{4}-\\d{2}-\\d{2}$/.test(from))query=query.gte("created_at",from+"T00:00:00.000Z");
- if(typeof to==="string"&&/^\\d{4}-\\d{2}-\\d{2}$/.test(to))query=query.lte("created_at",to+"T23:59:59.999Z");
+ if(typeof from==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(from))query=query.gte("created_at",from+"T00:00:00.000Z");
+ if(typeof to==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(to))query=query.lte("created_at",to+"T23:59:59.999Z");
  if(typeof actor==="string"&&actor.trim())query=query.ilike("actor_email","%"+actor.trim().replace(/[%,]/g,"")+"%");
  if(typeof action==="string"&&action.trim()&&action!=="ALL")query=query.eq("action",action);
  const {data,error}=await query;
