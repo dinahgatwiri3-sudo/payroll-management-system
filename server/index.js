@@ -10,6 +10,22 @@ function requireRole(...allowed){return async(req,res,next)=>{if(!ready(res))ret
 async function audit(user,action,details){const {error}=await db.from("audit_logs").insert({actor_email:user.email,action,details});if(error)console.error("Audit insert failed:",error.message)}
 app.post("/api/audit",auth,async(req,res)=>{if(!ready(res))return;const allowed=["LOGIN_SUCCESS","LOGOUT","EXPORT_EMPLOYEES","EXPORT_PAYROLL"];const {action,details}=req.body||{};if(!allowed.includes(action))return res.status(400).json({error:"Unsupported audit action."});await audit(req.user,action,typeof details==="string"?details.slice(0,300):null);res.json({ok:true})});
 app.get("/api/health",(_,res)=>res.json({ok:true}));
+const failedLoginWindows=new Map();
+app.post("/api/auth/failed-login",async(req,res)=>{
+ if(!ready(res))return;
+ const email=typeof req.body?.email==="string"?req.body.email.trim().toLowerCase():"";
+ if(email.length>254||!/^\\S+@\\S+\\.\\S+$/.test(email))return res.status(400).json({error:"A valid email address is required."});
+ const now=Date.now(),windowMs=15*60*1000,previous=failedLoginWindows.get(email);
+ const attempt=previous&&now-previous.startedAt<windowMs?{startedAt:previous.startedAt,count:previous.count+1}:{startedAt:now,count:1};
+ failedLoginWindows.set(email,attempt);
+ if(failedLoginWindows.size>5000){for(const [key,value] of failedLoginWindows){if(now-value.startedAt>=windowMs)failedLoginWindows.delete(key);}}
+ if(attempt.count<=5){
+  const {error}=await db.from("audit_logs").insert({actor_email:email,action:"FAILED_LOGIN",details:"Unsuccessful sign-in attempt"});
+  if(error)return res.status(500).json({error:"Could not record the sign-in event."});
+ }
+ res.json({ok:true});
+});
+
 app.get("/api/access/users",auth,requireRole("admin"),async(req,res)=>{if(!ready(res))return;const {data:authData,error:authError}=await db.auth.admin.listUsers({page:1,perPage:200});if(authError)return res.status(400).json({error:authError.message});const {data:roles,error}=await db.from("user_roles").select("user_id,role,created_at");if(error)return res.status(500).json({error:"Could not load roles. Run the user_roles SQL migration first."});const roleMap=new Map(roles.map(x=>[x.user_id,x]));res.json(authData.users.map(u=>({id:u.id,email:u.email,role:roleMap.get(u.id)?.role||"viewer",created_at:u.created_at})))});
 app.patch("/api/access/users/:id/password",auth,requireRole("admin"),async(req,res)=>{if(!ready(res))return;const password=req.body?.password;if(typeof password!=="string"||password.length<8||password.length>128)return res.status(400).json({error:"Password must be between 8 and 128 characters."});const {data:target,error:targetError}=await db.auth.admin.getUserById(req.params.id);if(targetError||!target.user)return res.status(404).json({error:"User account not found."});const {error}=await db.auth.admin.updateUserById(req.params.id,{password});if(error)return res.status(400).json({error:error.message});await audit(req.user,"RESET_USER_PASSWORD","Reset password for "+(target.user.email||req.params.id));res.json({ok:true,user_id:req.params.id})});
 app.patch("/api/access/users/:id",auth,requireRole("admin"),async(req,res)=>{if(!ready(res))return;const role=req.body?.role;if(!["admin","payroll_officer","viewer"].includes(role))return res.status(400).json({error:"Choose a valid role."});if(req.params.id===req.user.id&&role!=="admin")return res.status(400).json({error:"You cannot remove your own administrator role."});const {data:target,error:targetError}=await db.auth.admin.getUserById(req.params.id);if(targetError||!target.user)return res.status(404).json({error:"User account not found."});const {data:existing,error:existingError}=await db.from("user_roles").select("role").eq("user_id",req.params.id).maybeSingle();if(existingError)return res.status(500).json({error:existingError.message});if(existing?.role==="admin"&&role!=="admin"){const {count,error:countError}=await db.from("user_roles").select("user_id",{count:"exact",head:true}).eq("role","admin");if(countError)return res.status(500).json({error:countError.message});if((count||0)<=1)return res.status(409).json({error:"The system must always have at least one administrator."})}const {error}=await db.from("user_roles").upsert({user_id:req.params.id,role,updated_at:new Date().toISOString()},{onConflict:"user_id"});if(error)return res.status(400).json({error:error.message});await audit(req.user,"UPDATE_USER_ROLE","Changed role for "+(target.user.email||req.params.id)+" to "+role);res.json({ok:true,user_id:req.params.id,role})});
