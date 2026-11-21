@@ -96,3 +96,5 @@ td small{display:block;color:#5e7e78;margin-top:4px;font-size:12px}
 .loginbox .textbutton{width:auto;margin:0;padding:2px 4px;background:transparent;color:var(--teal-800);border:0;text-decoration:underline;font-weight:800}
 .loginbox .textbutton:hover{background:transparent;color:var(--teal-600)}
 .auth-notice{line-height:1.5}
+
+.payroll-modal{width:min(100%,1100px);max-height:90vh;overflow:auto}.payroll-modal .muted,.item-edit .muted{color:var(--muted);font-size:13px}.payroll-modal .modalhead{margin-bottom:18px}.item-edit{margin-top:22px;padding:18px;background:#edf6f4;border:1px solid var(--line);border-radius:10px}.item-edit h3{margin:0 0 12px;color:var(--ink);font:800 16px Manrope,sans-serif}.item-edit .fields{margin-bottom:8px}.item-edit label{display:grid;gap:8px;font-size:13px;font-weight:700;color:var(--ink)}.item-edit input{padding:11px 12px;border:1px solid var(--line);border-radius:8px;width:100%;background:#fff;color:var(--ink);min-height:42px}.item-edit .actions{margin-top:12px}
