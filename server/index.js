@@ -2,7 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import {authClient,db} from "./supabase.js";
-const app=express();app.use(cors({origin:"http://localhost:5173"}));app.use(express.json());
+const app=express();app.use(cors({origin:"http://localhost:5173"}));app.use(express.json({limit:"5mb"}));
 async function auth(req,res,next){const t=(req.headers.authorization||"").replace(/^Bearer /,"");if(!t||!authClient)return res.status(401).json({error:"Sign in required or Supabase configuration missing."});const {data,error}=await authClient.auth.getUser(t);if(error||!data.user)return res.status(401).json({error:"Invalid session."});req.user=data.user;next()}
 function ready(res){if(!db){res.status(500).json({error:"Server Supabase settings missing. Check .env and restart."});return false}return true}
 function requireRole(...allowed){return async(req,res,next)=>{if(!ready(res))return;const {data,error}=await db.from("user_roles").select("role").eq("user_id",req.user.id).maybeSingle();if(error)return res.status(500).json({error:"Role permissions are not configured. Run the user_roles SQL migration in Supabase first."});req.userRole=data?.role||"viewer";if(!allowed.includes(req.userRole))return res.status(403).json({error:"You do not have permission to perform this action. Contact an administrator."});next()}}
