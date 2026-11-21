@@ -41,7 +41,7 @@ export default function App(){
  async function login(e){
   e.preventDefault();setBusy(true);setError("");setAuthNotice("");
   try{const {data,error}=await supabase.auth.signInWithPassword({email:email.trim(),password});if(error)throw error;setSession(data.session);if(data.session)await api("/audit",data.session.access_token,{method:"POST",body:JSON.stringify({action:"LOGIN_SUCCESS",details:"User signed in successfully"})})}
-  catch(err){setError(err.message||"Unable to sign in. Please try again.")}finally{setBusy(false)}
+  catch(err){try{await api("/auth/failed-login","",{method:"POST",body:JSON.stringify({email:email.trim()})})}catch(logError){console.error("Failed sign-in event could not be recorded:",logError.message)}setError(err.message||"Unable to sign in. Please try again.")}finally{setBusy(false)}
  }
  async function createAccount(e){
   e.preventDefault();setError("");setAuthNotice("");
