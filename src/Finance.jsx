@@ -8,7 +8,7 @@ function dateValue(v){
  if(v instanceof Date&&!Number.isNaN(v.getTime()))return [v.getFullYear(),String(v.getMonth()+1).padStart(2,"0"),String(v.getDate()).padStart(2,"0")].join("-");
  if(typeof v==="number"){const d=XLSX.SSF.parse_date_code(v);if(d)return [d.y,String(d.m).padStart(2,"0"),String(d.d).padStart(2,"0")].join("-")}
  const s=String(v??"").trim();if(/^\d{4}-\d{2}-\d{2}/.test(s))return s.slice(0,10);
- const m=s.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})$/);if(m){const y=m[3].length===2?"20"+m[3]:m[3];return [y,m[2].padStart(2,"0"),m[1].padStart(2,"0")].join("-")}
+ const m=s.match(/^(\\d{1,2})[/-](\\d{1,2})[/-](\\d{2,4})(?:\\s.*)?$/);if(m){const y=m[3].length===2?"20"+m[3]:m[3];return [y,m[2].padStart(2,"0"),m[1].padStart(2,"0")].join("-")}
  const d=new Date(s);return Number.isNaN(d.getTime())?"":d.toISOString().slice(0,10);
 }
 function pick(row,keys){const entries=Object.entries(row);for(const key of keys){const found=entries.find(([k,v])=>norm(k)===norm(key)&&v!=="");if(found)return found[1]}return ""}
