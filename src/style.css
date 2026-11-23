@@ -1,7 +1,7 @@
 /* Generated using AppDeploy UI skill */
 /* Monochrome black and charcoal theme */
 /* Palette: light neutral canvas, charcoal navigation, black controls and text */
-:root{--page:#FF0000;--surface:#eceeef;--surface-strong:#f8f8f9;--teal-900:#111315;--teal-800:#202326;--teal-700:#303438;--teal-600:#454b50;--teal-100:#e1e3e5;--ink:#17191c;--muted:#666c72;--line:#d2d5d8;--shadow:0 10px 28px rgba(0,0,0,.10)}
+:root{--page:#FF0000;--surface:#000080;--surface-strong:#f8f8f9;--teal-900:#111315;--teal-800:#202326;--teal-700:#303438;--teal-600:#454b50;--teal-100:#e1e3e5;--ink:#17191c;--muted:#666c72;--line:#d2d5d8;--shadow:0 10px 28px rgba(0,0,0,.10)}
 *{box-sizing:border-box}
 body{margin:0;background:var(--page);color:var(--ink);font-family:'DM Sans',Arial,sans-serif;font-size:14px;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 button,input,select{font:inherit}
