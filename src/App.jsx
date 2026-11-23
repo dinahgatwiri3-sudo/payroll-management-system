@@ -13,7 +13,7 @@ async function api(path,token,options={}) {
 }
 const kes=n=>new Intl.NumberFormat("en-KE",{style:"currency",currency:"KES",maximumFractionDigits:0}).format(Number(n||0));
 const blankEmployee={employee_no:"",full_name:"",phone:"",email:"",department:"",job_title:"",monthly_salary:"",status:"Active"};
-const defaultTheme={page:"#d7d9dc",surface:"#eceeef",surfaceStrong:"#f8f8f9",sidebar:"#111315",sidebarEnd:"#343a40",accent:"#303438",accentHover:"#202326",text:"#17191c"};
+const defaultTheme={page:"#d7d9dc",surface:"#eceeef",surfaceStrong:"#f8f8f9",sidebar:"#1565C0",sidebarEnd:"#343a40",accent:"#303438",accentHover:"#202326",text:"#17191c"};
 const themeFields=[["page","Page background"],["surface","Workspace background"],["surfaceStrong","Cards and panels"],["sidebar","Sidebar top"],["sidebarEnd","Sidebar bottom"],["accent","Buttons and highlights"],["accentHover","Button hover"],["text","Main text"]];
 function csvCell(value){
  let s=String(value??"");
